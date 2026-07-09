@@ -1,0 +1,9 @@
+node_modules/
+.wwebjs_auth/
+.wwebjs_cache/
+leads.csv
+leads.legacy-*.csv
+qr.png
+.env
+.email-key
+email-credentials.enc

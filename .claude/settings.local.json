@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -c bot.js)",
+      "Bash(node -c leads.js)"
+    ]
+  }
+}
