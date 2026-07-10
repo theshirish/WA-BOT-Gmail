@@ -229,7 +229,24 @@ let currentClient = null;
 async function boot(allowRetry = true) {
     bootSignalReceived = false;
     currentClient = createClient();
-    currentClient.initialize();
+
+    try {
+        await currentClient.initialize();
+    } catch (err) {
+        if (String(err.message).includes('already running for')) {
+            console.error(
+                '\nAnother instance of this bot is already running and holding the WhatsApp ' +
+                'session lock (that other process is the one actually answering messages right ' +
+                'now, likely with outdated code/config). Find and stop it first:\n' +
+                '  pgrep -fl "node bot.js"   (lists the PID and its working directory)\n' +
+                '  kill <pid>                (NOT kill -9 — let it shut down cleanly)\n' +
+                'Then run "npm start" again.\n'
+            );
+        } else {
+            console.error('Failed to start WhatsApp client:', err);
+        }
+        process.exit(1);
+    }
 
     setTimeout(async () => {
         if (bootSignalReceived) return;
