@@ -7,10 +7,25 @@ const ChromeLauncher = require('chrome-launcher');
 const config = require('./config');
 const { saveLead } = require('./leads');
 const { sendCatalogEmail } = require('./mailer');
+const { hasEmailPassword } = require('./credentials');
 
 const QR_IMAGE_PATH = path.join(__dirname, 'qr.png');
 const SESSION_DIR = path.join(__dirname, '.wwebjs_auth');
 const BOOT_TIMEOUT_MS = 45_000; // if no qr/ready by then, the saved session is likely corrupted
+
+function printStartupConfig() {
+    console.log('--- Bot configuration ---');
+    console.log(`Business Name  : ${config.businessName}`);
+    console.log(`City           : ${config.city}`);
+    console.log(`Address        : ${config.address}`);
+    console.log(`Maps URL       : ${config.mapsUrl}`);
+    console.log(`Catalog URL    : ${config.catalogUrl}`);
+    console.log(`Gmail User     : ${config.gmailUser}`);
+    console.log(`Greeting words : ${config.greetingKeywords.join(', ')}`);
+    console.log(`Email sending  : ${hasEmailPassword() ? 'enabled (credentials found)' : 'DISABLED — run "node setup-email.js"'}`);
+    console.log('-------------------------');
+}
+printStartupConfig();
 
 // Use the system Chrome if we can find one (faster startup, no extra download).
 // Fall back to the Chromium bundled with puppeteer otherwise.
