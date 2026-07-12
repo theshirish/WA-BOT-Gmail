@@ -5,8 +5,15 @@ const LEADS_FILE = path.join(__dirname, 'leads.csv');
 const COLUMNS = ['timestamp', 'phone', 'name', 'pushname', 'is_business', 'saved_contact', 'message'];
 const HEADER = COLUMNS.join(',');
 
+// Prefixing with a single quote neutralizes CSV/formula injection: without it, a
+// WhatsApp sender who sets their name/message to e.g. =HYPERLINK(...) would have
+// that execute as a live formula the moment this file is opened in Excel/Sheets.
 function csvEscape(value) {
-    return `"${String(value ?? '').replace(/"/g, '""')}"`;
+    let str = String(value ?? '');
+    if (/^[=+\-@\t\r]/.test(str)) {
+        str = `'${str}`;
+    }
+    return `"${str.replace(/"/g, '""')}"`;
 }
 
 function istTimestamp(date = new Date()) {

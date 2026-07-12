@@ -180,7 +180,9 @@ function createClient() {
 
     client.on('disconnected', (reason) => {
         console.error('Client disconnected:', reason, '- reinitializing...');
-        client.initialize();
+        client.initialize().catch((err) => {
+            console.error('Failed to reinitialize after disconnect:', err.message);
+        });
     });
 
     client.on('message', async (msg) => {
