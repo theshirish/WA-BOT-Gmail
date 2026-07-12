@@ -29,8 +29,9 @@ WhatsApp → Settings → Linked Devices → tap the old bot's device entry → 
 ## 1. Prerequisites on the new machine
 
 - [Node.js](https://nodejs.org) 18 or newer (`node -v` to check)
-- Google Chrome installed (recommended — the bot auto-detects and reuses it,
-  skipping a ~200MB Chromium download; not required, see step 3)
+- **Google Chrome installed** — the bot always drives your system Chrome via
+  `chrome-launcher`; it does not use Puppeteer's own bundled Chromium (that
+  download is skipped entirely in step 3, since it's been unreliable)
 - A phone with WhatsApp, ready to scan a QR code
 - A Gmail account with **2-Step Verification enabled**, so you can generate an
   **App Password** (regular Gmail passwords don't work for SMTP)
@@ -50,16 +51,27 @@ git checkout Dev
 
 ## 3. Install dependencies
 
-If Google Chrome is already installed on this machine:
-
 ```bash
 PUPPETEER_SKIP_DOWNLOAD=true npm install
 ```
 
-If not, run plain `npm install` instead — it will download its own bundled Chromium (~200MB):
+Always use the `PUPPETEER_SKIP_DOWNLOAD=true` flag. Without it, Puppeteer tries to
+download its own bundled Chromium during install, which fails on some networks/machines
+with an error like:
+
+```
+Error: ERROR: Failed to set up chrome-headless-shell ...! Set "PUPPETEER_SKIP_DOWNLOAD" env variable to skip download.
+```
+
+When that happens, `npm install` aborts partway through and leaves `node_modules`
+incomplete — which shows up later as a confusing, unrelated-looking error like
+`Cannot find module 'dotenv'` when you try to run the bot. The bot never uses
+Puppeteer's bundled browser anyway (it always uses your system Chrome from
+step 1), so this download isn't needed. If you ever hit that error:
 
 ```bash
-npm install
+rm -rf node_modules
+PUPPETEER_SKIP_DOWNLOAD=true npm install
 ```
 
 ## 4. Configure business details
@@ -157,3 +169,12 @@ rm -rf .wwebjs_auth
 
 **Email sending shows "DISABLED" at startup**
 Re-run `node setup-email.js` — the encrypted credential files weren't found.
+
+**`Error: Cannot find module 'dotenv'` (or any other module) when starting the bot**
+`npm install` didn't actually finish — almost always because Puppeteer's bundled-Chromium
+download failed partway through (see step 3) and npm aborted before installing everything.
+Fix:
+```bash
+rm -rf node_modules
+PUPPETEER_SKIP_DOWNLOAD=true npm install
+```
